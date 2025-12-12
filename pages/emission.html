@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>碳森林 - 碳记录</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- 碳记录页面样式 -->
+    <style>
+        .emission-container {
+            margin-top: 20px;
+            margin-bottom: 80px;
+        }
+        
+        .emission-header {
+            background-color: #87CEEB;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .emission-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        /* 二级分类容器样式 */
+        #secondaryTypeContainer,
+        #travelTimeContainer {
+            margin-top: 15px;
+            display: none;
+            transition: all 0.3s ease;
+        }
+        
+        /* 响应式表单样式 */
+        @media (max-width: 768px) {
+            .emission-form {
+                padding: 15px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-control {
+                font-size: 16px;
+                padding: 12px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+        
+        /* 小屏幕优化 */
+        @media (max-width: 480px) {
+            .emission-header {
+                padding: 15px;
+            }
+            
+            .emission-header h2 {
+                font-size: 20px;
+            }
+            
+            .emission-stats {
+                padding: 15px;
+            }
+            
+            .stats-cards {
+                gap: 15px;
+            }
+            
+            .stat-card {
+                min-width: 100%;
+            }
+        }
+        
+        /* 触摸设备优化 */
+        @media (hover: none) {
+            .form-control {
+                touch-action: manipulation;
+            }
+            
+            .btn {
+                touch-action: manipulation;
+            }
+        }
+        
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            max-width: 350px;
+            width: 90%;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1050;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .notification-top-right {
+            top: 20px;
+            right: 20px;
+        }
+        
+        .notification-top-left {
+            top: 20px;
+            left: 20px;
+        }
+        
+        .notification-bottom-right {
+            bottom: 20px;
+            right: 20px;
+        }
+        
+        .notification-bottom-left {
+            bottom: 20px;
+            left: 20px;
+        }
+        
+        .notification-show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .notification-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .notification-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+        
+        .notification-content i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        
+        .notification-close:hover {
+            opacity: 1;
+        }
+        
+        /* 记录项样式 */
+        .emission-item {
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .emission-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hover-shadow {
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .hover-shadow:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 错误提示样式 */
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        
+        /* 计算力显示样式 */
+        .compute-power {
+            font-weight: bold;
+        }
+        
+        .emission-stats {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .stats-cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+        }
+        
+        .stat-card.primary {
+            background-color: #3498db;
+        }
+        
+        .stat-card.success {
+            background-color: #2ecc71;
+        }
+        
+        .stat-card.warning {
+            background-color: #f39c12;
+        }
+        
+        .stat-card.danger {
+            background-color: #e74c3c;
+        }
+        
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+        }
+        
+        .emission-list {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .emission-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .emission-item:last-child {
+            border-bottom: none;
+        }
+        
+        .emission-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .emission-type {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .emission-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .emission-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .emission-amount {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .emission-energy {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .emission-actions {
+            margin-top: 10px;
+        }
+        
+        .emission-actions button {
+            margin-right: 5px;
+            padding: 3px 10px;
+            font-size: 12px;
+        }
+        
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-cards {
+                flex-direction: column;
+            }
+            
+            .emission-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="../assets/images/logo.png" alt="碳森林">
+                    <span>碳森林</span>
+                </div>
+                <div class="user-info">
+                    <img src="../assets/images/default_avatar.png" alt="用户头像" class="user-avatar">
+                    <span class="user-name">用户名</span>
+                    <button class="btn btn-outline" onclick="logout()">退出</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <div class="container emission-container">
+        <div class="emission-header">
+            <h2><i class="fa fa-line-chart"></i> 碳排放记录</h2>
+            <p>记录和管理您的碳排放数据</p>
+        </div>
+
+        <!-- 碳记录表单 -->
+        <div class="emission-form">
+            <h3>添加碳排放记录</h3>
+            <form id="emissionForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="emissionType" class="form-label">排放类型</label>
+                            <select class="form-select" id="emissionType" name="emission_type" required>
+                                <option value="">请选择排放类型</option>
+                                <option value="算力">算力消耗</option>
+                                <option value="出行">交通出行</option>
+                                <option value="购物">商品消费</option>
+                                <option value="饮食">食品消费</option>
+                                <option value="生活">日常生活</option>
+                            </select>
+                            <div class="invalid-feedback">请选择排放类型</div>
+                        </div>
+                        <!-- 二级分类选择 -->
+                        <div class="mb-3" id="secondaryTypeContainer" style="display: none;">
+                            <label for="secondaryType" class="form-label">出行方式</label>
+                            <select class="form-select" id="secondaryType" name="secondary_type">
+                                <option value="">请选择出行方式</option>
+                                <option value="高铁">高铁</option>
+                                <option value="飞机">飞机</option>
+                                <option value="自行车">自行车</option>
+                                <option value="私家车">私家车</option>
+                                <option value="公交">公交</option>
+                                <option value="地铁">地铁</option>
+                                <option value="步行">步行</option>
+                                <option value="出租车">出租车</option>
+                                <option value="网约车">网约车</option>
+                            </select>
+                            <div class="invalid-feedback">请选择出行方式</div>
+                        </div>
+                        
+                        <!-- 出行时间选择 -->
+                        <div class="mb-3" id="travelTimeContainer" style="display: none;">
+                            <label for="travelTime" class="form-label">出行时间 (分钟)</label>
+                            <input type="number" class="form-control" id="travelTime" name="travel_time" min="1" max="1440" required>
+                            <div class="invalid-feedback">请输入出行时间（1-1440分钟）</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3" style="display: none;">
+                            <input type="number" class="form-control" id="computePower" name="compute_power" step="0.01" min="0.01">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="emissionDate" class="form-label">排放日期</label>
+                            <input type="date" class="form-control" id="emissionDate" name="emission_date" readonly style="background-color: #f5f5f5;" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="description" class="form-label">描述</label>
+                            <input type="text" class="form-control" id="description" name="description" placeholder="可选">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i> 保存记录
+                </button>
+            </form>
+        </div>
+
+        <!-- 碳排放统计 -->
+        <div class="emission-stats">
+            <h3>碳排放统计</h3>
+            <div class="stats-cards">
+                <div class="stat-card primary">
+                    <div class="stat-value" id="totalEmission">0</div>
+                    <div class="stat-label">总碳排放量</div>
+                    <div class="stat-unit">kg CO₂</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="totalEnergy">0</div>
+                    <div class="stat-label">获得能量</div>
+                    <div class="stat-unit">能量</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value" id="dailyEmission">0</div>
+                    <div class="stat-label">今日排放</div>
+                    <div class="stat-unit">kg CO₂</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-value" id="recordCount">0</div>
+                    <div class="stat-label">记录条数</div>
+                    <div class="stat-unit">条</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="emissionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 碳排放记录列表 -->
+        <div class="emission-list">
+            <h3>排放记录历史</h3>
+            <div id="emissionRecords"></div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination" id="pagination"></ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 底部功能入口 -->
+    <div class="forest-footer">
+        <div class="footer-item active" onclick="window.location.href='emission.html'">
+            <div class="footer-icon"><i class="fa fa-line-chart"></i></div>
+            <div class="footer-label">碳记录</div>
+        </div>
+        <div class="footer-item" onclick="window.location.href='tasks.html'">
+            <div class="footer-icon"><i class="fa fa-tasks"></i></div>
+            <div class="footer-label">任务中心</div>
+        </div>
+        <div class="footer-item" onclick="window.location.href='index.html'">
+            <div class="footer-icon"><i class="fa fa-tree"></i></div>
+            <div class="footer-label">我的森林</div>
+        </div>
+        <div class="footer-item" onclick="window.location.href='ranking.html'">
+            <div class="footer-icon"><i class="fa fa-trophy"></i></div>
+            <div class="footer-label">排行榜</div>
+        </div>
+        <div class="footer-item" onclick="window.location.href='donation.html'">
+            <div class="footer-icon"><i class="fa fa-heart"></i></div>
+            <div class="footer-label">公益捐赠</div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义JS -->
+    <script src="../assets/js/main.js"></script>
+    
+    <!-- 碳记录页面JS -->
+    <script>
+        // 全局变量
+        let currentPage = 1;
+        let totalPages = 1;
+        let emissionChart = null;
+        
+        // 数据缓存
+        const dataCache = {
+            stats: null,
+            statsTimestamp: null,
+            records: {}, // 使用page作为键
+            recordsTimestamp: {} // 使用page作为键
+        };
+        
+        // 缓存配置
+        const CACHE_DURATION = 60000; // 缓存1分钟
+        
+        // 显示通知
+        function showNotification(message, type = 'info', duration = 3000, position = 'top-right') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type} notification-${position}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fa fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            // 添加到页面
+            document.body.appendChild(notification);
+            
+            // 添加显示动画
+            setTimeout(() => {
+                notification.classList.add('notification-show');
+            }, 10);
+            
+            // 自动关闭通知
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.classList.remove('notification-show');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, duration);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('碳记录页面加载完成');
+            
+            // 设置默认日期为今天
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('emissionDate').value = today;
+            
+            // 初始化页面
+            initEmissionPage();
+            
+            // 排放类型选择事件监听
+            document.getElementById('emissionType').addEventListener('change', function() {
+                handleEmissionTypeChange();
+            });
+            
+            // 表单提交事件
+            document.getElementById('emissionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitEmissionForm();
+            });
+            
+            // 添加通知样式
+            const style = document.createElement('style');
+            style.textContent = `
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 16px;
+                    border-radius: 4px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    min-width: 300px;
+                    transition: all 0.3s ease;
+                }
+                
+                .notification-success {
+                    background-color: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+                
+                .notification-error {
+                    background-color: #f8d7da;
+                    color: #721c24;
+                    border: 1px solid #f5c6cb;
+                }
+                
+                .notification-info {
+                    background-color: #d1ecf1;
+                    color: #0c5460;
+                    border: 1px solid #bee5eb;
+                }
+                
+                .notification-content {
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .notification-content i {
+                    margin-right: 8px;
+                    font-size: 18px;
+                }
+                
+                .notification-close {
+                    background: none;
+                    border: none;
+                    font-size: 20px;
+                    cursor: pointer;
+                    opacity: 0.7;
+                    margin-left: 10px;
+                    color: inherit;
+                }
+                
+                .notification-close:hover {
+                    opacity: 1;
+                }
+                
+                /* 加载状态样式 */
+                .loading-spinner {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                    color: #666;
+                }
+                
+                .loading-spinner i {
+                    font-size: 24px;
+                    margin-right: 10px;
+                }
+                
+                /* 图表加载状态 */
+                .chart-container.loading::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(255, 255, 255, 0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10;
+                }
+                
+                .chart-container.loading::after {
+                    content: '';
+                    width: 40px;
+                    height: 40px;
+                    border: 3px solid rgba(231, 76, 60, 0.3);
+                    border-radius: 50%;
+                    border-top-color: #e74c3c;
+                    animation: spin 1s ease-in-out infinite;
+                    z-index: 11;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+                
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                
+                /* 按钮加载状态 */
+                .btn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+        
+        // 初始化页面
+        function initEmissionPage() {
+            // 加载用户信息
+            loadUserInfo();
+            
+            // 加载碳排放统计
+            loadEmissionStats();
+            
+            // 加载碳排放记录
+            loadEmissionRecords();
+            
+            // 初始化图表
+            initChart();
+        }
+        
+        // 加载用户信息
+        function loadUserInfo() {
+            // 这里应该从localStorage或API获取用户信息
+            const user = {
+                name: "测试用户",
+                avatar: "../assets/images/default_avatar.png"
+            };
+            
+            // 更新用户信息
+            document.querySelectorAll('.user-name').forEach(el => el.textContent = user.name);
+            document.querySelectorAll('.user-avatar, .forest-user-avatar').forEach(el => el.src = user.avatar);
+        }
+        
+        // 处理排放类型变化
+        function handleEmissionTypeChange() {
+            const emissionType = document.getElementById('emissionType');
+            const secondaryTypeContainer = document.getElementById('secondaryTypeContainer');
+            const travelTimeContainer = document.getElementById('travelTimeContainer');
+            const secondaryType = document.getElementById('secondaryType');
+            const travelTime = document.getElementById('travelTime');
+            
+            // 清除之前的错误状态
+            secondaryType.classList.remove('is-invalid');
+            travelTime.classList.remove('is-invalid');
+            
+            // 清除错误提示信息
+            const secondaryTypeError = document.getElementById('secondaryTypeError');
+            const travelTimeError = document.getElementById('travelTimeError');
+            if (secondaryTypeError) secondaryTypeError.style.display = 'none';
+            if (travelTimeError) travelTimeError.style.display = 'none';
+            
+            if (emissionType.value === '出行') {
+                secondaryTypeContainer.style.display = 'block';
+                travelTimeContainer.style.display = 'block';
+                // 当选择出行类型时，二级分类和出行时间为必填项
+                secondaryType.required = true;
+                travelTime.required = true;
+            } else {
+                secondaryTypeContainer.style.display = 'none';
+                travelTimeContainer.style.display = 'none';
+                secondaryType.required = false;
+                travelTime.required = false;
+                // 清空二级分类和出行时间选择
+                secondaryType.value = '';
+                travelTime.value = '';
+            }
+            
+            // 更新算力值
+            calculateComputePower();
+        }
+        
+        // 表单验证函数
+        function validateForm() {
+            let isValid = true;
+            
+            // 清除之前的错误状态
+            document.querySelectorAll('.form-control, .form-select').forEach(input => {
+                input.classList.remove('is-invalid');
+            });
+            
+            // 验证排放类型
+            const emissionType = document.getElementById('emissionType');
+            if (!emissionType.value) {
+                emissionType.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // 验证二级分类（如果是出行类型）
+            const secondaryType = document.getElementById('secondaryType');
+            if (emissionType.value === '出行' && !secondaryType.value) {
+                secondaryType.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // 验证出行时间（如果是出行类型）
+            const travelTime = document.getElementById('travelTime');
+            if (emissionType.value === '出行') {
+                travelTime.required = true;
+                if (!travelTime.value) {
+                    travelTime.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    const travelTimeValue = parseInt(travelTime.value);
+                    if (isNaN(travelTimeValue) || travelTimeValue < 1 || travelTimeValue > 1440) {
+                        travelTime.classList.add('is-invalid');
+                        isValid = false;
+                    }
+                }
+            } else {
+                travelTime.required = false;
+            }
+            
+            // 算力值将由系统自动计算，无需验证
+            
+            // 日期已自动填充为当天，无需验证
+            
+            return isValid;
+        }
+        
+        // 排放类型与算力值映射表
+        const emissionTypePowerMap = {
+            '算力': 100.0,
+            '出行': {
+                '高铁': 0.015,
+                '飞机': 0.25,
+                '自行车': 0.0,
+                '私家车': 0.15,
+                '公交': 0.05,
+                '地铁': 0.03,
+                '步行': 0.0,
+                '出租车': 0.12,
+                '网约车': 0.1
+            },
+            '购物': 50.0,
+            '饮食': 30.0,
+            '生活': 80.0
+        };
+        
+        // 自动计算算力值
+        function calculateComputePower() {
+            const emissionType = document.getElementById('emissionType').value;
+            const secondaryType = document.getElementById('secondaryType').value;
+            let computePower = 0.0;
+            
+            if (emissionType === '出行' && secondaryType) {
+                computePower = emissionTypePowerMap[emissionType][secondaryType];
+            } else if (emissionType && emissionTypePowerMap[emissionType] && typeof emissionTypePowerMap[emissionType] === 'number') {
+                computePower = emissionTypePowerMap[emissionType];
+            }
+            
+            // 设置算力值
+            document.getElementById('computePower').value = computePower;
+            return computePower;
+        }
+        
+        // 提交碳记录表单
+        async function submitEmissionForm() {
+            // 计算并填充算力值
+            calculateComputePower();
+            
+            // 表单验证
+            if (!validateForm()) {
+                return;
+            }
+            
+            const form = document.getElementById('emissionForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                // 显示加载状态
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 提交中...';
+                
+                // 获取token
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('未登录');
+                }
+                
+                // 检查是新增还是编辑
+                const recordId = form.dataset.recordId;
+                const isEditMode = !!recordId;
+                
+                // 构建请求URL和配置
+                const url = isEditMode ? `../api/carbon/edit.php?id=${recordId}` : '../api/carbon/add.php';
+                const method = 'POST';
+                
+                // 发送请求
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // 显示成功消息
+                    showNotification(result.message, 'success');
+                    
+                    // 重置表单
+                    form.reset();
+                    document.getElementById('emissionDate').value = new Date().toISOString().split('T')[0];
+                    handleEmissionTypeChange(); // 重置类型相关的UI
+                    
+                    // 退出编辑模式
+                    submitBtn.textContent = '提交记录';
+                    submitBtn.classList.remove('btn-warning');
+                    delete form.dataset.recordId;
+                    
+                    // 重新加载数据
+                    loadEmissionStats();
+                    loadEmissionRecords();
+                } else {
+                    // 显示错误消息
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('提交失败:', error);
+                showNotification('提交失败，请稍后重试', 'error');
+            } finally {
+                // 恢复按钮状态
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '提交记录';
+            }
+        }
+        
+        // 加载碳排放统计
+        async function loadEmissionStats() {
+            // 检查缓存
+            const now = Date.now();
+            if (dataCache.stats && dataCache.statsTimestamp && (now - dataCache.statsTimestamp < CACHE_DURATION)) {
+                // 使用缓存数据
+                const cachedData = dataCache.stats;
+                // 更新统计卡片
+                document.getElementById('totalEmission').textContent = cachedData.total_emission.toFixed(2);
+                document.getElementById('totalEnergy').textContent = cachedData.total_energy;
+                document.getElementById('dailyEmission').textContent = cachedData.daily_emission.toFixed(2);
+                document.getElementById('recordCount').textContent = cachedData.record_count;
+                // 更新图表
+                updateChart(cachedData.chart_data);
+                return;
+            }
+            
+            // 显示加载状态
+            const statsCards = document.querySelectorAll('.stats-card');
+            statsCards.forEach(card => {
+                card.innerHTML = '<div class="loading-spinner"><i class="fa fa-spinner fa-spin"></i> 加载中...</div>';
+            });
+            
+            try {
+                // 获取token
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('未登录');
+                }
+                
+                // 添加请求超时控制
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
+                // 发送请求
+                const response = await fetch('../api/carbon/stats.php', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // 更新缓存
+                    dataCache.stats = result.data;
+                    dataCache.statsTimestamp = now;
+                    
+                    // 更新统计卡片
+                    document.getElementById('totalEmission').textContent = result.data.total_emission.toFixed(2);
+                    document.getElementById('totalEnergy').textContent = result.data.total_energy;
+                    document.getElementById('dailyEmission').textContent = result.data.daily_emission.toFixed(2);
+                    document.getElementById('recordCount').textContent = result.data.record_count;
+                    
+                    // 更新图表
+                    updateChart(result.data.chart_data);
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+                
+                if (error.name === 'AbortError') {
+                    showNotification('加载超时，请稍后重试', 'error');
+                } else if (error.message === '未登录') {
+                    window.location.href = 'login.html';
+                } else {
+                    // 使用模拟数据
+                    const mockData = {
+                        total_emission: 123.45,
+                        total_energy: 234,
+                        daily_emission: 12.34,
+                        record_count: 56,
+                        chart_data: {
+                            labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                            values: [20.12, 18.56, 25.34, 30.45, 28.76, 35.23]
+                        }
+                    };
+                    
+                    // 更新统计卡片
+                    document.getElementById('totalEmission').textContent = mockData.total_emission.toFixed(2);
+                    document.getElementById('totalEnergy').textContent = mockData.total_energy;
+                    document.getElementById('dailyEmission').textContent = mockData.daily_emission.toFixed(2);
+                    document.getElementById('recordCount').textContent = mockData.record_count;
+                    
+                    // 更新图表
+                    updateChart(mockData.chart_data);
+                }
+            }
+        }
+        
+        // 加载碳排放记录
+        async function loadEmissionRecords(page = 1) {
+            // 检查缓存
+            const now = Date.now();
+            if (dataCache.records[page] && dataCache.recordsTimestamp[page] && (now - dataCache.recordsTimestamp[page] < CACHE_DURATION)) {
+                // 使用缓存数据
+                const cachedData = dataCache.records[page];
+                // 更新记录列表
+                renderEmissionRecords(cachedData.records);
+                // 更新分页
+                currentPage = cachedData.page;
+                totalPages = Math.ceil(cachedData.total / cachedData.limit);
+                renderPagination();
+                return;
+            }
+            
+            // 显示加载状态
+            const container = document.getElementById('emissionRecords');
+            container.innerHTML = '<div class="text-center text-muted py-3"><i class="fa fa-spinner fa-spin"></i> 加载记录中...</div>';
+            
+            try {
+                // 获取token
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('未登录');
+                }
+                
+                // 构建URL
+                const url = new URL('../api/carbon/list.php', window.location.href);
+                url.searchParams.set('page', page);
+                url.searchParams.set('limit', 10);
+                
+                // 添加请求超时控制
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
+                // 发送请求
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // 更新缓存
+                    dataCache.records[page] = result.data;
+                    dataCache.recordsTimestamp[page] = now;
+                    
+                    // 更新记录列表
+                    renderEmissionRecords(result.data.records);
+                    
+                    // 更新分页
+                    currentPage = result.data.page;
+                    totalPages = Math.ceil(result.data.total / result.data.limit);
+                    renderPagination();
+                } else {
+                    container.innerHTML = '<div class="text-center text-muted py-3">加载失败，请稍后重试</div>';
+                }
+            } catch (error) {
+                console.error('加载记录失败:', error);
+                
+                if (error.name === 'AbortError') {
+                    container.innerHTML = '<div class="text-center text-muted py-3">加载超时，请稍后重试</div>';
+                } else if (error.message === '未登录') {
+                    window.location.href = 'login.html';
+                } else {
+                    container.innerHTML = '<div class="text-center text-muted py-3">加载失败，请稍后重试</div>';
+                }
+            }
+        }
+        
+        // 渲染碳排放记录列表
+        function renderEmissionRecords(records) {
+            const container = document.getElementById('emissionRecords');
+            
+            if (records.length === 0) {
+                container.innerHTML = `<div class="text-center text-muted py-5">
+                    <i class="fa fa-info-circle fa-3x mb-3"></i>
+                    <p>暂无碳排放记录</p>
+                    <p class="text-sm">点击上方"添加碳排放记录"开始记录你的碳足迹吧</p>
+                </div>`;
+                return;
+            }
+            
+            const html = records.map(record => `
+                <div class="emission-item shadow-sm hover-shadow">
+                    <div class="emission-item-header">
+                        <span class="emission-type badge badge-primary">${getEmissionTypeName(record.emission_type)}</span>
+                        <span class="emission-date">${record.emission_date}</span>
+                    </div>
+                    <div class="emission-details">
+                        <div>
+                            <div>算力: <span class="text-success">${record.compute_power} kWh</span></div>
+                            <div>排放量: <span class="emission-amount text-danger">${record.emission_amount.toFixed(2)} kg CO₂</span></div>
+                            ${record.description ? `<div>描述: ${record.description}</div>` : '<div>描述: <span class="text-muted">无描述</span></div>'}
+                        </div>
+                        <div>
+                            <div class="emission-energy text-success">获得能量: ${record.energy_gained} 能量</div>
+                        </div>
+                    </div>
+                    <div class="emission-actions">
+                        <button class="btn btn-sm btn-primary" onclick="editEmissionRecord(${record.emission_id})">
+                            <i class="fa fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteEmissionRecord(${record.emission_id})">
+                            <i class="fa fa-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+        
+
+        
+        // 编辑碳排放记录
+        async function editEmissionRecord(recordId) {
+            try {
+                // 获取token
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('未登录');
+                }
+                
+                // 发送请求获取记录详情
+                const response = await fetch(`../api/carbon/detail.php?id=${recordId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const record = result.data;
+                    
+                    // 填充表单数据
+                    document.getElementById('emissionType').value = record.emission_type;
+                    document.getElementById('emissionDate').value = record.emission_date;
+                    document.getElementById('computePower').value = record.compute_power;
+                    document.getElementById('description').value = record.description;
+                    
+                    // 处理二级分类和出行时间
+                    handleEmissionTypeChange();
+                    
+                    // 如果是出行类型，填充出行方式和出行时间
+                    if (record.emission_type === '出行' && record.secondary_type) {
+                        document.getElementById('secondaryType').value = record.secondary_type;
+                        if (record.travel_time) {
+                            document.getElementById('travelTime').value = record.travel_time;
+                        }
+                    }
+                    
+                    // 显示编辑模式提示
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.textContent = '更新记录';
+                    submitBtn.classList.add('btn-warning');
+                    
+                    // 保存记录ID，用于后续更新
+                    document.getElementById('emissionForm').dataset.recordId = recordId;
+                    
+                    // 滚动到表单顶部
+                    document.getElementById('emissionForm').scrollIntoView({ behavior: 'smooth' });
+                    
+                    showNotification('进入编辑模式，修改后点击更新记录按钮', 'info');
+                } else {
+                    showNotification('加载记录失败，请稍后重试', 'error');
+                }
+            } catch (error) {
+                console.error('编辑记录失败:', error);
+                showNotification('编辑记录失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 删除碳排放记录
+        async function deleteEmissionRecord(recordId) {
+            // 使用更现代化的确认方式
+            const confirmed = window.confirm('确定要删除这条记录吗？此操作不可恢复。');
+            if (!confirmed) {
+                return;
+            }
+            
+            try {
+                // 获取token
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('未登录');
+                }
+                
+                // 发送请求
+                const response = await fetch('../api/carbon/delete.php', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ record_id: recordId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // 显示成功消息
+                    showNotification(result.message, 'success');
+                    
+                    // 重新加载数据
+                    loadEmissionStats();
+                    loadEmissionRecords();
+                } else {
+                    // 显示错误消息
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                showNotification('删除失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 渲染分页
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+            
+            // 上一页
+            const prevItem = document.createElement('li');
+            prevItem.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevItem.innerHTML = `<a class="page-link" href="#" onclick="loadEmissionRecords(${currentPage - 1})">上一页</a>`;
+            container.appendChild(prevItem);
+            
+            // 页码
+            for (let i = 1; i <= totalPages; i++) {
+                const pageItem = document.createElement('li');
+                pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                pageItem.innerHTML = `<a class="page-link" href="#" onclick="loadEmissionRecords(${i})">${i}</a>`;
+                container.appendChild(pageItem);
+            }
+            
+            // 下一页
+            const nextItem = document.createElement('li');
+            nextItem.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextItem.innerHTML = `<a class="page-link" href="#" onclick="loadEmissionRecords(${currentPage + 1})">下一页</a>`;
+            container.appendChild(nextItem);
+        }
+        
+        // 初始化图表
+        function initChart() {
+            // 检查canvas元素是否存在
+            let canvas = document.getElementById('emissionChart');
+            if (!canvas) {
+                // 如果不存在，创建一个新的canvas元素
+                const chartContainer = document.querySelector('.chart-container');
+                canvas = document.createElement('canvas');
+                canvas.id = 'emissionChart';
+                chartContainer.innerHTML = '';
+                chartContainer.appendChild(canvas);
+            }
+            
+            // 销毁已存在的图表实例，避免内存泄漏
+            if (emissionChart) {
+                emissionChart.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            emissionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '碳排放量 (kg CO₂)',
+                        data: [],
+                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                        borderColor: 'rgba(231, 76, 60, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(231, 76, 60, 0.9)',
+                        hoverBorderColor: 'rgba(231, 76, 60, 1)',
+                        hoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '碳排放量 (kg CO₂)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '时间'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `碳排放量: ${context.parsed.y.toFixed(2)} kg CO₂`;
+                                },
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 800,
+                        easing: 'easeInOutQuad'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+            
+            // 添加窗口大小变化监听，确保图表能正确调整大小
+            window.addEventListener('resize', function() {
+                if (emissionChart) {
+                    emissionChart.resize();
+                }
+            });
+        }
+        
+        // 更新图表
+        function updateChart(data) {
+            if (!emissionChart) return;
+            
+            // 显示图表加载状态
+            const chartContainer = document.querySelector('.chart-container');
+            chartContainer.classList.add('loading');
+            
+            // 确保数据有效
+            if (!data || !data.labels || !data.values) {
+                data = {
+                    labels: [],
+                    values: []
+                };
+            }
+            
+            // 更新图表数据
+            emissionChart.data.labels = data.labels;
+            emissionChart.data.datasets[0].data = data.values;
+            
+            // 更新图表
+            emissionChart.update();
+            
+            // 移除加载状态
+            setTimeout(() => {
+                chartContainer.classList.remove('loading');
+            }, 300);
+            
+            // 添加空数据处理
+            const chartCanvas = document.getElementById('emissionChart');
+            const chartWrapper = chartCanvas.parentElement;
+            
+            // 移除之前的空数据提示
+            const existingEmptyMessage = chartWrapper.querySelector('.empty-chart-message');
+            if (existingEmptyMessage) {
+                existingEmptyMessage.remove();
+            }
+            
+            // 如果没有数据，显示空数据提示
+            if (data.values.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-chart-message';
+                emptyMessage.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: #6c757d;
+                    font-size: 18px;
+                    pointer-events: none;
+                `;
+                emptyMessage.textContent = '暂无数据';
+                chartWrapper.appendChild(emptyMessage);
+            }
+        }
+        
+
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+        
+        // 获取排放类型名称
+        function getEmissionTypeName(type) {
+            // 考虑可能的中英文混合情况
+            const typeMap = {
+                '算力': '算力消耗',
+                '出行': '交通出行',
+                '购物': '商品消费',
+                '饮食': '食品消费',
+                '生活': '日常生活',
+                'compute_power': '算力消耗',
+                'electricity': '电力消耗',
+                'transportation': '交通出行',
+                'food_consumption': '食品消费',
+                'other': '其他'
+            };
+            return typeMap[type] || type;
+        }
+    </script>
+</body>
+</html>

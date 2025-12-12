@@ -1,0 +1,8 @@
+2025-12-12 20:53:14 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist
+2025-12-12 20:54:06 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist
+2025-12-12 20:54:46 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist
+2025-12-12 20:54:50 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist
+2025-12-12 21:12:25 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist
+2025-12-12 21:12:31 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist
+2025-12-12 21:13:22 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist
+2025-12-12 22:08:34 - 获取碳记录统计失败: 数据库查询失败: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'carbon_forest.energy_transactions' doesn't exist

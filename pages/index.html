@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>碳森林 - 首页</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="../assets/images/logo.png" alt="碳森林">
+                    <span>碳森林</span>
+                </div>
+                <div class="user-info">
+                    <img src="../assets/images/default_avatar.png" alt="用户头像" class="user-avatar">
+                    <span class="user-name">用户名</span>
+                    <button class="btn btn-outline" onclick="logout()">退出</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <div class="container forest-container">
+        <!-- 用户信息头部 -->
+        <div class="forest-header">
+            <div class="forest-user-info">
+                <img src="../assets/images/default_avatar.png" alt="用户头像" class="forest-user-avatar">
+                <div class="forest-user-details">
+                    <h3>用户名</h3>
+                    <p>个人用户</p>
+                </div>
+            </div>
+            <div class="energy-info">
+                <div class="energy-value">0</div>
+                <div class="energy-label">可用能量</div>
+                <div class="max-energy-info">
+                    <small>最大储存: <span class="max-energy">100</span> 能量</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="forest-main">
+            <!-- 虚拟载体区域 -->
+            <div class="carrier-section">
+                <div class="energy-balls">
+                    <!-- 能量球将通过JS动态添加 -->
+                    <div class="energy-ball" style="left: 20%; top: 30%;" data-amount="5">+5</div>
+                    <div class="energy-ball" style="left: 70%; top: 40%;" data-amount="8">+10</div>
+                    <div class="energy-ball" style="left: 40%; top: 70%;" data-amount="3">+15</div>
+                </div>
+                <img src="../assets/images/carrier_tree_0.png" alt="碳汇树" class="carrier-image">
+                <div class="carrier-info">
+                    <h3 class="carrier-name">种子</h3>
+                    <p class="carrier-description">刚刚种下的种子，需要你的精心呵护</p>
+                    <div class="carrier-actions">
+                        <button class="btn water-btn" onclick="waterCarrier()">
+                            <i class="fa fa-tint"></i> 浇水
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <!-- 下一阶段信息 -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">下一阶段</h3>
+                    <div class="next-stage">
+                        <img src="../assets/images/carrier_tree_1.png" alt="小幼苗" class="next-stage-image">
+                        <div class="next-stage-info">
+                            <div class="next-stage-name">小幼苗</div>
+                            <div class="energy-required">需要能量: <span>100</span></div>
+                        </div>
+                    </div>
+                    <div class="energy-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">0/100</div>
+                    </div>
+                </div>
+
+                <!-- 任务列表 -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">今日任务</h3>
+                    <div class="task-stats">
+                        <!-- 任务统计信息将通过JS动态加载 -->
+                    </div>
+                    <div class="task-list">
+                        <!-- 任务列表将通过JS动态加载 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部功能入口 -->
+        <div class="forest-footer">
+            <div class="footer-item" onclick="window.location.href='emission.html'">
+                <div class="footer-icon"><i class="fa fa-line-chart"></i></div>
+                <div class="footer-label">碳记录</div>
+            </div>
+            <div class="footer-item" onclick="window.location.href='tasks.html'">
+                <div class="footer-icon"><i class="fa fa-tasks"></i></div>
+                <div class="footer-label">任务中心</div>
+            </div>
+            <div class="footer-item" onclick="window.location.href='friends.html'">
+                <div class="footer-icon"><i class="fa fa-users"></i></div>
+                <div class="footer-label">好友林</div>
+            </div>
+            <div class="footer-item" onclick="window.location.href='ranking.html'">
+                <div class="footer-icon"><i class="fa fa-trophy"></i></div>
+                <div class="footer-label">排行榜</div>
+            </div>
+            <div class="footer-item" onclick="window.location.href='donation.html'">
+                <div class="footer-icon"><i class="fa fa-heart"></i></div>
+                <div class="footer-label">公益捐赠</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义JS -->
+    <script src="../assets/js/main.js"></script>
+    
+    <!-- 页面加载完成后初始化 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，开始初始化...');
+            
+            // 调试：检查能量显示区域是否可见
+            setTimeout(function() {
+                const energyValue = document.querySelector('.energy-value');
+                const progressFill = document.querySelector('.progress-fill');
+                const progressText = document.querySelector('.progress-text');
+                
+                console.log('DOM加载后元素状态:');
+                console.log('能量值元素:', energyValue);
+                console.log('进度条填充元素:', progressFill);
+                console.log('进度条文本元素:', progressText);
+                
+                if (energyValue) {
+                    console.log('能量值元素样式:', window.getComputedStyle(energyValue));
+                    console.log('能量值元素位置:', energyValue.getBoundingClientRect());
+                }
+                if (progressFill) {
+                    console.log('进度条填充样式:', window.getComputedStyle(progressFill));
+                    console.log('进度条填充位置:', progressFill.getBoundingClientRect());
+                }
+            }, 100);
+            
+            initIndexPage();
+        });
+    </script>
+</body>
+</html>
